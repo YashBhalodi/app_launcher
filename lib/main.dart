@@ -30,7 +30,8 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     Future getList() async {
-      List<Application> appList = await DeviceApps.getInstalledApplications();
+      List<Application> appList = [];
+      appList = await DeviceApps.getInstalledApplications(includeSystemApps: true,onlyAppsWithLaunchIntent: true);
       return appList;
     }
 
@@ -41,7 +42,7 @@ class _MyHomePageState extends State<MyHomePage> {
           return Container(child: Text("Some error has occured!"));
         }
         return ListView.builder(
-          itemCount: appSnap.data.length,
+//          itemCount: appSnap.data.length, //TODO determine whether length here is causing the problem and proceed with importing icons
           itemBuilder: (context, index) {
             Application appEntity = appSnap.data[index];
             return new AppCard(app: appEntity);
@@ -54,7 +55,7 @@ class _MyHomePageState extends State<MyHomePage> {
     Future<void> _exitPrompt() async {
       return showDialog<void>(
         context: context,
-        barrierDismissible: false, // user must tap button!
+        barrierDismissible: false, // user must tap buttons!
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text('Oops!'),
@@ -70,7 +71,9 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               RaisedButton(
                 child: Text('Stay!'),
-                onPressed: () {Navigator.of(context).pop();},
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
                 color: Colors.blueAccent,
                 textColor: Colors.white,
               ),
@@ -81,18 +84,23 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     return Scaffold(
-        appBar: AppBar(
-          actions: <Widget>[
-            FlatButton(color: Colors.red[300],
-              onPressed: _exitPrompt, /*() {
-                SystemChannels.platform.invokeMethod('SystemNavigator.pop');
-              },*/
-              child: Icon(Icons.close,color: Colors.white,size: 30.0,),
+      //TODO splash screen
+      appBar: AppBar(
+        actions: <Widget>[
+          FlatButton(
+            color: Colors.red[300],
+            onPressed: _exitPrompt,
+            child: Icon(
+              Icons.close,
+              color: Colors.white,
+              size: 40.0,
             ),
-          ],
-          title: Text(widget.title),
-        ),
-        body: listAppWidget);
+          ),
+        ],
+        title: Text(widget.title),
+      ),
+      body: listAppWidget, //TODO progress indicator while future is building
+    );
   }
 }
 
@@ -100,64 +108,70 @@ class AppCard extends StatelessWidget {
   AppCard({Key key, this.app}) : super(key: key);
   final Application app;
 
+  Widget _showAcknowledgement(String a) {
+    return SimpleDialog(
+      children: <Widget>[
+        new Text("Launching $a..."),
+        new CircularProgressIndicator(),
+      ],
+      title: Text(
+        "Roger that!",
+        style: TextStyle(fontWeight: FontWeight.w500),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(top: 10.0, bottom: 10.0, left: 5.0, right: 5.0),
+      height: 80.0,
       margin: EdgeInsets.only(bottom: 10.0),
       decoration: BoxDecoration(
-          border: Border.all(width: 0.5),
-          borderRadius: BorderRadius.all(Radius.circular(5.0))),
+        border: Border.all(width: 0.5),
+        borderRadius: BorderRadius.all(
+          Radius.circular(5.0),
+        ),
+      ),
       child: Row(
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           //icon
-          Container(
-            width: 50.0,
-            height: 50.0,
-            child: FlutterLogo(), //TODO
-          ),
-          //column with name, package name
+          SizedBox(
+              height: double.maxFinite,
+              child: FlutterLogo(
+                size: 50.0,
+              )),   //TODO place app icon here
+          //app name
           Expanded(
-            child: Column(
-              children: <Widget>[
-                Padding(
-                  padding:
-                      const EdgeInsets.only(left: 8.0, top: 4.0, bottom: 4.0),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(app.appName,
-                        style: TextStyle(
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.w600,
-                        )),
-                  ),
-                ),
-                Padding(
-                  padding:
-                      const EdgeInsets.only(left: 8.0, top: 4.0, bottom: 4.0),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(app.packageName,
-                        style: TextStyle(
-                          fontSize: 14.0,
-                          fontWeight: FontWeight.w400,
-                        )),
-                  ),
-                ),
-              ],
+            child: Padding(
+              padding: const EdgeInsets.only(left: 10.0),
+              child: Text(app.appName,
+                  style: TextStyle(
+                    fontSize: 18.0,
+                    fontWeight: FontWeight.w600,
+                  )),
             ),
           ),
           //launch button
-          Container(
-            width: 50.0,
-            height: 50.0,
-            child: FlatButton(
-                onPressed: () {
-                  DeviceApps.openApp(app.packageName);
-                  SystemChannels.platform.invokeMethod('SystemNavigator.pop');
-                },
-                child: Icon(Icons.launch,color: Colors.blueAccent,size: 25.0,),),
+          MaterialButton(
+            height: double.maxFinite,
+            elevation: 5.0,
+            animationDuration: Duration(milliseconds: 500),
+            highlightColor: Colors.cyan,
+            splashColor: Colors.white,
+            onPressed: () {
+              //TODO repair acknowledgement prompt
+              _showAcknowledgement(app.appName);
+              DeviceApps.openApp(app.packageName);
+              SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+            },
+            color: Colors.blue,
+            child: Center(
+                child: Icon(
+              Icons.launch,
+              color: Colors.white,
+              size: 40.0,
+            )),
           ),
         ],
       ),
