@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+//TODO tidy up the code in separate class file after icon successfully imported
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -31,39 +32,56 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     Future getList() async {
-      List<Application> appList = [];
-      appList = await DeviceApps.getInstalledApplications(
+      //List<Application> appList = [];
+      List<Application> appList = await DeviceApps.getInstalledApplications(
           includeSystemApps: true, onlyAppsWithLaunchIntent: true);
+
       //sorting the list alphabetically
-      appList.sort((a,b){
+      appList.sort((a, b) {
         return a.appName.toLowerCase().compareTo(b.appName.toLowerCase());
       });
       return appList;
     }
 
     Widget listAppWidget = FutureBuilder(
-      builder: (context, appSnap) {
-        if (appSnap.connectionState == ConnectionState.none &&
-            appSnap.hasData == null) {
-          return Container(child: Text("Some error has occured!"));
-        }
-        return ListView.builder(
-          itemCount: appSnap.data.length,
-          //TODO determine whether length here is causing the problem and proceed with importing icons
-          itemBuilder: (context, index) {
-            Application appEntity = appSnap.data[index];
-            return new AppCard(app: appEntity);
-          },
-        );
-      },
       future: getList(),
+      builder: (context, appSnap) {
+        switch (appSnap.connectionState) {
+          case ConnectionState.none:
+            return Center(child: new Text("ConnectionState.none"));
+            break;
+          case ConnectionState.waiting:
+            return Center(
+              child: new CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation(Colors.yellow),
+              ),
+            );
+            break;
+          case ConnectionState.active:
+            return Center(
+              child: new CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation(Colors.green),
+              ),
+            );
+            break;
+          case ConnectionState.done:
+            return ListView.builder(
+                itemCount: appSnap.data.length,
+                itemBuilder: (context, index) {
+                  Application appEntity = appSnap.data[index];
+                  return new AppCard(app: appEntity);
+                });
+            break;
+          default:
+            return Center(child: new CircularProgressIndicator());
+        }
+      },
     );
 
     Future<void> _exitPrompt() async {
       return showDialog<void>(
         context: context,
         barrierDismissible: true,
-        // user can dismiss the box by tapping outside the box!
         builder: (BuildContext context) {
           return AlertDialog(
             shape: RoundedRectangleBorder(
@@ -109,7 +127,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
         title: Text(widget.title),
       ),
-      body: listAppWidget, //TODO progress indicator while future is building
+      body: listAppWidget,
     );
   }
 }
@@ -120,11 +138,23 @@ class AppCard extends StatelessWidget {
 
   _showAcknowledgement(String a) {
     //toast acknowledgement until SimpleDialog is repaired.
+
     Fluttertoast.showToast(
-        msg: "Launching $a",
+        msg: "Closing the launcher\nLaunching $a",
         toastLength: Toast.LENGTH_LONG,
         gravity: ToastGravity.BOTTOM,
         fontSize: 16.0);
+
+    //possible bug in following code block
+    //The next toast has unused text below the msg
+    //TODO figure out the solution of extra space in toast
+    /*Future.delayed(Duration(milliseconds: 1000),(){
+      Fluttertoast.cancel();
+      Fluttertoast.showToast(
+        msg: "Launching $a\n",
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+        fontSize: 16.0);});*/
 
     //intended SimpleDialog acknowledgement
     /*return new SimpleDialog(
@@ -155,7 +185,7 @@ class AppCard extends StatelessWidget {
               height: double.maxFinite,
               child: FlutterLogo(
                 size: 50.0,
-              )), //TODO place app icon here
+              )), //TODO place app's icon here
           //app name
           Expanded(
             child: Padding(
