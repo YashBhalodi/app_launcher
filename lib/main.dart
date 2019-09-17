@@ -32,7 +32,7 @@ class _MyHomePageState extends State<MyHomePage> {
     Future getList() async {
       List<Application> appList = [];
       appList = await DeviceApps.getInstalledApplications(includeSystemApps: true,onlyAppsWithLaunchIntent: true);
-      return appList;
+      return appList;       //TODO return alphabetically sorted list
     }
 
     Widget listAppWidget = FutureBuilder(
