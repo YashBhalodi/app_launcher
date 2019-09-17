@@ -1,6 +1,7 @@
 import 'package:device_apps/device_apps.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 void main() => runApp(MyApp());
 
@@ -31,8 +32,13 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     Future getList() async {
       List<Application> appList = [];
-      appList = await DeviceApps.getInstalledApplications(includeSystemApps: true,onlyAppsWithLaunchIntent: true);
-      return appList;       //TODO return alphabetically sorted list
+      appList = await DeviceApps.getInstalledApplications(
+          includeSystemApps: true, onlyAppsWithLaunchIntent: true);
+      //sorting the list alphabetically
+      appList.sort((a,b){
+        return a.appName.toLowerCase().compareTo(b.appName.toLowerCase());
+      });
+      return appList;
     }
 
     Widget listAppWidget = FutureBuilder(
@@ -42,7 +48,8 @@ class _MyHomePageState extends State<MyHomePage> {
           return Container(child: Text("Some error has occured!"));
         }
         return ListView.builder(
-//          itemCount: appSnap.data.length, //TODO determine whether length here is causing the problem and proceed with importing icons
+          itemCount: appSnap.data.length,
+          //TODO determine whether length here is causing the problem and proceed with importing icons
           itemBuilder: (context, index) {
             Application appEntity = appSnap.data[index];
             return new AppCard(app: appEntity);
@@ -55,9 +62,12 @@ class _MyHomePageState extends State<MyHomePage> {
     Future<void> _exitPrompt() async {
       return showDialog<void>(
         context: context,
-        barrierDismissible: false, // user must tap buttons!
+        barrierDismissible: true,
+        // user can dismiss the box by tapping outside the box!
         builder: (BuildContext context) {
           return AlertDialog(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(10.0))),
             title: Text('Oops!'),
             content: Text("You are trying to exit this app."),
             actions: <Widget>[
@@ -108,17 +118,22 @@ class AppCard extends StatelessWidget {
   AppCard({Key key, this.app}) : super(key: key);
   final Application app;
 
-  Widget _showAcknowledgement(String a) {
-    return SimpleDialog(
+  _showAcknowledgement(String a) {
+    //toast acknowledgement until SimpleDialog is repaired.
+    Fluttertoast.showToast(
+        msg: "Launching $a",
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+        fontSize: 16.0);
+
+    //intended SimpleDialog acknowledgement
+    /*return new SimpleDialog(
+      title: new Text("Roger that!"),
       children: <Widget>[
-        new Text("Launching $a..."),
-        new CircularProgressIndicator(),
+        Container(child: new Text("Launching $a"),),
+        Container(child: new CircularProgressIndicator(),)
       ],
-      title: Text(
-        "Roger that!",
-        style: TextStyle(fontWeight: FontWeight.w500),
-      ),
-    );
+    );*/
   }
 
   @override
@@ -140,7 +155,7 @@ class AppCard extends StatelessWidget {
               height: double.maxFinite,
               child: FlutterLogo(
                 size: 50.0,
-              )),   //TODO place app icon here
+              )), //TODO place app icon here
           //app name
           Expanded(
             child: Padding(
