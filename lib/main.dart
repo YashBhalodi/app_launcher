@@ -32,9 +32,10 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     Future getList() async {
-      //List<Application> appList = [];
       List<Application> appList = await DeviceApps.getInstalledApplications(
-          includeSystemApps: true, onlyAppsWithLaunchIntent: true);
+          includeSystemApps: true,
+          onlyAppsWithLaunchIntent: true,
+          includeAppIcons: true);
 
       //sorting the list alphabetically
       appList.sort((a, b) {
@@ -53,7 +54,7 @@ class _MyHomePageState extends State<MyHomePage> {
           case ConnectionState.waiting:
             return Center(
               child: new CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation(Colors.yellow),
+                valueColor: AlwaysStoppedAnimation(Colors.lightBlue),
               ),
             );
             break;
@@ -78,8 +79,9 @@ class _MyHomePageState extends State<MyHomePage> {
       },
     );
 
-    Future<void> _exitPrompt() async {
-      return showDialog<void>(
+    Future<bool> _exitPrompt() async {
+      //TODO invoke this function when user tries to exit app using back button
+      return showDialog<bool>(
         context: context,
         barrierDismissible: true,
         builder: (BuildContext context) {
@@ -111,23 +113,26 @@ class _MyHomePageState extends State<MyHomePage> {
       );
     }
 
-    return Scaffold(
-      //TODO splash screen
-      appBar: AppBar(
-        actions: <Widget>[
-          FlatButton(
-            color: Colors.red[300],
-            onPressed: _exitPrompt,
-            child: Icon(
-              Icons.close,
-              color: Colors.white,
-              size: 40.0,
+    return WillPopScope(
+      onWillPop: _exitPrompt,
+      child: Scaffold(
+        //TODO splash screen
+        appBar: AppBar(
+          actions: <Widget>[
+            FlatButton(
+              color: Colors.red[300],
+              onPressed: _exitPrompt,
+              child: Icon(
+                Icons.close,
+                color: Colors.white,
+                size: 40.0,
+              ),
             ),
-          ),
-        ],
-        title: Text(widget.title),
+          ],
+          title: Text(widget.title),
+        ),
+        body: listAppWidget,
       ),
-      body: listAppWidget,
     );
   }
 }
@@ -183,9 +188,8 @@ class AppCard extends StatelessWidget {
           //icon
           SizedBox(
               height: double.maxFinite,
-              child: FlutterLogo(
-                size: 50.0,
-              )), //TODO place app's icon here
+              child: FlutterLogo(size: 50.0,)),
+          //TODO place app's icon here
           //app name
           Expanded(
             child: Padding(
