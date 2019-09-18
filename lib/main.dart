@@ -81,7 +81,6 @@ class _MyHomePageState extends State<MyHomePage> {
     );
 
     Future<bool> _exitPrompt() async {
-      //TODO invoke this function when user tries to exit app using back button
       return showDialog<bool>(
         context: context,
         barrierDismissible: true,
