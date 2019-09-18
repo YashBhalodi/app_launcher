@@ -2,6 +2,7 @@ import 'package:device_apps/device_apps.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:vibrate/vibrate.dart';
 
 //TODO tidy up the code in separate class file after icon successfully imported
 void main() => runApp(MyApp());
@@ -188,7 +189,9 @@ class AppCard extends StatelessWidget {
           //icon
           SizedBox(
               height: double.maxFinite,
-              child: FlutterLogo(size: 50.0,)),
+              child: FlutterLogo(
+                size: 50.0,
+              )),
           //TODO place app's icon here
           //app name
           Expanded(
@@ -210,6 +213,7 @@ class AppCard extends StatelessWidget {
             splashColor: Colors.white,
             onPressed: () {
               //TODO repair acknowledgement prompt
+              Vibrate.feedback(FeedbackType.success);
               _showAcknowledgement(app.appName);
               DeviceApps.openApp(app.packageName);
               SystemChannels.platform.invokeMethod('SystemNavigator.pop');
