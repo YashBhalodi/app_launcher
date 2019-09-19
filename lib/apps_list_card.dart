@@ -13,6 +13,7 @@ class AppsCardList extends StatelessWidget {
   final double cardMarginBottom;
   final bool getIcons;
   final TextStyle appNameStyle;
+  final bool sortAlphabetically;
 
   const AppsCardList(
       {Key key,
@@ -24,7 +25,8 @@ class AppsCardList extends StatelessWidget {
       this.appNameStyle: const TextStyle(
         fontSize: 18.0,
         fontWeight: FontWeight.w600,
-      )})
+      ),
+      this.sortAlphabetically: true})
       : super(key: key);
 
   void _showAcknowledgement(String a) {
@@ -58,6 +60,13 @@ class AppsCardList extends StatelessWidget {
             return Center(child: CircularProgressIndicator());
           } else {
             List<Application> apps = data.data;
+            if (this.sortAlphabetically) {
+              apps.sort((a, b) {
+                return a.appName
+                    .toLowerCase()
+                    .compareTo(b.appName.toLowerCase());
+              });
+            }
             return ListView.builder(
                 itemBuilder: (context, position) {
                   Application app = apps[position];
