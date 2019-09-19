@@ -81,7 +81,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
           title: Text(widget.title),
         ),
-        body: AppsCardList(),
+        body: AppsCardList(getIcons: false,),
       ),
     );
   }

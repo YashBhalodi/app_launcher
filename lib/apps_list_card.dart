@@ -9,11 +9,22 @@ import 'package:vibrate/vibrate.dart';
 class AppsCardList extends StatelessWidget {
   final bool includeSystemApps;
   final bool onlyAppsWithLaunchIntent;
+  final double cardHeight;
+  final double cardMarginBottom;
+  final bool getIcons;
+  final TextStyle appNameStyle;
 
   const AppsCardList(
       {Key key,
       this.includeSystemApps: false,
-      this.onlyAppsWithLaunchIntent: false})
+      this.onlyAppsWithLaunchIntent: false,
+      this.cardHeight: 80.0,
+      this.cardMarginBottom: 10.0,
+      this.getIcons: true,
+      this.appNameStyle: const TextStyle(
+        fontSize: 18.0,
+        fontWeight: FontWeight.w600,
+      )})
       : super(key: key);
 
   void _showAcknowledgement(String a) {
@@ -51,8 +62,8 @@ class AppsCardList extends StatelessWidget {
                 itemBuilder: (context, position) {
                   Application app = apps[position];
                   return Container(
-                    height: 80.0,
-                    margin: EdgeInsets.only(bottom: 10.0),
+                    height: this.cardHeight,
+                    margin: EdgeInsets.only(bottom: this.cardMarginBottom),
                     decoration: BoxDecoration(
                       border: Border.all(width: 0.5),
                       borderRadius: BorderRadius.all(
@@ -64,22 +75,18 @@ class AppsCardList extends StatelessWidget {
                       children: <Widget>[
                         //icon
                         SizedBox(
-                          height: double.maxFinite,
-                          child: FlutterLogo(
-                            size: 50.0,
-                          ),
-                        ),
+                            height: double.maxFinite,
+                            width: this.cardHeight,
+                            child: app is ApplicationWithIcon && getIcons
+                                ? Image.memory(app.icon)
+                                : FlutterLogo(size: this.cardHeight)),
                         //TODO place application icon here
 
                         //app name
                         Expanded(
                           child: Padding(
                             padding: const EdgeInsets.only(left: 10.0),
-                            child: Text(app.appName,
-                                style: TextStyle(
-                                  fontSize: 18.0,
-                                  fontWeight: FontWeight.w600,
-                                )),
+                            child: Text(app.appName, style: this.appNameStyle),
                           ),
                         ),
                         //launch button
