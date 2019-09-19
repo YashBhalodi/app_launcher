@@ -16,8 +16,8 @@ class AppsCardList extends StatelessWidget {
 
   const AppsCardList(
       {Key key,
-      this.includeSystemApps: false,
-      this.onlyAppsWithLaunchIntent: false,
+      this.includeSystemApps: true,
+      this.onlyAppsWithLaunchIntent: true,
       this.cardHeight: 80.0,
       this.cardMarginBottom: 10.0,
       this.getIcons: true,
