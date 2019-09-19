@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:app_launcher/apps_list_card.dart';
 
-//TODO tidy up the code in separate class file after icon successfully imported
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
