@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:vibrate/vibrate.dart';
 
+//TODO remove the launcher itself from the list of applications
 
 class AppsCardList extends StatelessWidget {
   final bool includeSystemApps;
